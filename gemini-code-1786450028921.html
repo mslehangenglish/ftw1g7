@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice Exercises (Ex 7, 8, 9, 12) - Ms Lê Hằng English</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================
+       1. GIAO DIỆN NỀN LOANG & HỌA TIẾT SVG GAMIFICATION
+       ========================================== */
+    :root {
+      --primary-purple: #8854C0;
+      --accent-yellow: #FDCB6E;
+      --accent-teal: #00C9A7;
+      --correct-green: #00D26A;
+      --wrong-red: #FF4757;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --text-dark: #2D3436;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Quicksand', 'Nunito', sans-serif;
+      min-height: 100vh;
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 10px;
+      position: relative;
+      overflow-x: hidden;
+      
+      /* Gradient chuyển màu loang mượt continuous */
+      background: linear-gradient(-45deg, #8854C0, #FDCB6E, #00C9A7, #FF7675, #6C5CE7);
+      background-size: 400% 400%;
+      animation: gradientSmooth 15s ease infinite;
+    }
+
+    @keyframes gradientSmooth {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Họa tiết SVG lơ lửng vui nhộn */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.28;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 100 100"><path fill="%23FFF" d="M25,10 L29,20 L40,20 L31,27 L34,38 L25,31 L16,38 L19,27 L10,20 L21,20 Z"/><circle cx="75" cy="25" r="7" fill="%23FFF"/><path fill="%23FFF" d="M70,75 C70,70 80,70 80,75 C85,75 85,85 80,85 C80,90 70,90 70,85 C65,85 65,75 70,75 Z"/><path fill="%23FFF" d="M20,70 Q25,60 30,70 T40,70 T30,80 T20,70 Z"/><path fill="%23FFF" d="M80,15 C82,10 88,10 90,15 C95,17 95,23 90,25 C88,30 82,30 80,25 C75,23 75,17 80,15 Z"/></svg>');
+      background-size: 140px 140px;
+      animation: floatPattern 22s linear infinite;
+    }
+
+    @keyframes floatPattern {
+      from { background-position: 0 0; }
+      to { background-position: 500px 1000px; }
+    }
+
+    /* ==========================================
+       2. BỐ CỤC CHÍNH (CONTAINER)
+       ========================================== */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 820px;
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 25px 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.22), 0 0 0 8px rgba(255,255,255,0.45);
+      backdrop-filter: blur(12px);
+    }
+
+    .teacher-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .teacher-header h5 {
+      font-size: 0.95rem;
+      color: var(--primary-purple);
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: #E8D8F8;
+      display: inline-block;
+      padding: 5px 18px;
+      border-radius: 20px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+    }
+
+    .alert-banner {
+      background: #FFF9DB;
+      border: 3px dashed #FCC419;
+      border-radius: 18px;
+      padding: 14px 20px;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #D9480F;
+      font-weight: 700;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .alert-banner .title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      display: block;
+      margin-bottom: 4px;
+      color: #E65100;
+    }
+
+    .alert-banner .highlight {
+      color: #D32F2F;
+      text-decoration: underline;
+      font-style: italic;
+    }
+
+    .progress-box {
+      margin-bottom: 25px;
+      background: #E9ECEF;
+      border-radius: 14px;
+      height: 20px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid #CED4DA;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00C9A7, #00D26A);
+      transition: width 0.4s ease;
+    }
+
+    /* ==========================================
+       3. THẺ CÂU HỎI & NÚT LỰA CHỌN 3D
+       ========================================== */
+    .section-heading {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--primary-purple);
+      margin: 25px 0 15px 0;
+      padding: 12px 18px;
+      background: #F1F3F5;
+      border-radius: 16px;
+      border-left: 6px solid var(--primary-purple);
+      line-height: 1.5;
+    }
+
+    .question-card {
+      background: #FFFFFF;
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+      border: 2px solid #E9ECEF;
+      transition: transform 0.2s ease;
+    }
+
+    .question-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #2D3436;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background: #F8F9FA;
+      border: 2px solid #E9ECEF;
+      border-bottom: 5px solid #CED4DA;
+      border-radius: 18px;
+      padding: 14px 20px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #495057;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: inherit;
+    }
+
+    .option-btn:hover:not(.disabled) {
+      transform: scale(1.01) translateY(-2px);
+      border-color: #B2BEC3;
+      background: #FFFFFF;
+    }
+
+    .option-btn:active:not(.disabled) {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
+    }
+
+    .option-btn.correct {
+      background-color: #D4EDDA !important;
+      border-color: var(--correct-green) !important;
+      border-bottom-color: #27AE60 !important;
+      color: #155724 !important;
+    }
+
+    .option-btn.wrong {
+      background-color: #F8D7DA !important;
+      border-color: var(--wrong-red) !important;
+      border-bottom-color: #C0392B !important;
+      color: #721C24 !important;
+      animation: shake 0.4s ease;
+    }
+
+    .option-btn.disabled {
+      cursor: default;
+      opacity: 0.9;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* ==========================================
+       4. KHUNG GIẢI THÍCH CHI TIẾT 4 BƯỚC
+       ========================================== */
+    .explanation-box {
+      display: none;
+      margin-top: 18px;
+      background: #F8F9FA;
+      border: 2px dashed var(--primary-purple);
+      border-left: 6px solid var(--primary-purple);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 0.93rem;
+      line-height: 1.65;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .explanation-box .exp-title {
+      font-weight: 800;
+      color: var(--primary-purple);
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .explanation-box .step {
+      margin-bottom: 8px;
+    }
+
+    .explanation-box ul {
+      margin-left: 22px;
+      margin-bottom: 8px;
+    }
+
+    .explanation-box ul li {
+      margin-bottom: 3px;
+    }
+
+    .explanation-box .highlight-green {
+      color: #27AE60;
+      font-weight: 700;
+    }
+
+    /* ==========================================
+       5. NÚT NỘP BÀI VÀ POPUP KẾT QUẢ
+       ========================================== */
+    .submit-container {
+      text-align: center;
+      margin-top: 35px;
+      margin-bottom: 15px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(180deg, #00C9A7 0%, #00B894 100%);
+      color: white;
+      border: none;
+      border-bottom: 6px solid #008F68;
+      border-radius: 22px;
+      padding: 16px 50px;
+      font-size: 1.25rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0,201,167,0.35);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(0,201,167,0.45);
+    }
+
+    .submit-btn:active {
+      transform: translateY(3px);
+      border-bottom-width: 2px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 26px;
+      padding: 32px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-score {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--primary-purple);
+      margin: 15px 0;
+    }
+
+    .modal-feedback {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #2D3436;
+      margin-bottom: 25px;
+      background: #F8F9FA;
+      padding: 16px;
+      border-radius: 18px;
+      border: 2px dashed #B2BEC3;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: var(--primary-purple);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="container">
+    <div class="teacher-header">
+      <h5>Giáo viên tạo: Ms Lê Hằng English</h5>
+    </div>
+
+    <div class="alert-banner">
+      <span class="title">⚠️ LỜI NHẮC CỰC KỲ QUAN TRỌNG ⚠️</span>
+      Chỉ có đọc kỹ giải thích ngay sau mỗi câu, sau đó ghi lại từ vựng/cấu trúc mới vào vở để học thì mới thực sự giỏi lên.<br>
+      Làm cho xong mà không đọc giải thích hay đọc qua loa không ghi chép thì chỉ tốn thời gian vô ích!<br>
+      <span class="highlight">* Kéo tới đâu, làm tới đó! *</span>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div id="quiz-container"></div>
+
+    <div class="submit-container">
+      <button class="submit-btn" onclick="submitQuiz()">NỘP BÀI KIỂM TRA 🚀</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal-content">
+      <h2 style="color: var(--primary-purple);">🎉 KẾT QUẢ BÀI THI 🎉</h2>
+      <div class="modal-score" id="modal-score-text">0 / 0</div>
+      <div class="modal-feedback" id="modal-feedback-text"></div>
+      <button class="close-btn" onclick="closeModal()">Xem lại đáp án chi tiết</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================
+       1. CƠ SỞ DỮ LIỆU ĐỀ BÀI (EX 7, 8, 9, 12)
+       ========================================== */
+    const quizData = [
+      // ----- EXERCISE 7 -----
+      {
+        id: "ex7_1",
+        section: "Ex7: Put the words in the correct order to make sentences.",
+        question: "1. music / school, / compulsory / English / and / In / are / subjects / Lan's /.",
+        options: [
+          { letter: "A", text: "In Lan's school, English and music are compulsory subjects." },
+          { letter: "B", text: "In Lan's school, English music and are compulsory subjects." },
+          { letter: "C", text: "In school Lan's, English and music are compulsory subjects." },
+          { letter: "D", text: "English and music in Lan's school compulsory subjects are." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch nghĩa: 'Ở trường của Lan, Tiếng Anh và Âm nhạc là những môn học bắt buộc.'",
+          step2: [
+            "A. In Lan's school, English and music are compulsory subjects. (Chuẩn cấu trúc ngữ pháp 100%).",
+            "B. ...English music and are... (Sai trật tự liên từ 'and').",
+            "C. ...school Lan's... (Sai vị trí sở hữu cách 'Lan's school').",
+            "D. ...compulsory subjects are. (Sai vị trí động từ to be)."
+          ],
+          step3: "Tại sao chọn A? Cụm trạng ngữ chỉ địa điểm: 'In Lan's school'. Chủ ngữ ghép: 'English and music'. Động từ to be số nhiều: 'are'. Cụm danh từ: 'compulsory subjects' (môn học bắt buộc).",
+          step4: "Loại B, C, D do xáo trộn sai trật tự các cụm từ ngữ pháp."
+        }
+      },
+      {
+        id: "ex7_2",
+        section: "Ex7: Put the words in the correct order to make sentences.",
+        question: "2. mineral / drinks / Fruit / and / water / are / juice / healthy /.",
+        options: [
+          { letter: "A", text: "Fruit juice and mineral water are healthy drinks." },
+          { letter: "B", text: "Fruit juice mineral water and are healthy drinks." },
+          { letter: "C", text: "Healthy drinks are fruit juice mineral and water." },
+          { letter: "D", text: "Fruit juice and drinks are healthy mineral water." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch nghĩa: 'Nước ép trái cây và nước khoáng là những thức uống lành mạnh.'",
+          step2: [
+            "A. Fruit juice and mineral water are healthy drinks. (Chuẩn cấu trúc ngữ pháp).",
+            "B. ...juice mineral water and... (Thiếu liên từ 'and' ở đúng vị trí).",
+            "C. ...mineral and water... (Xáo trộn sai cụm danh từ 'mineral water').",
+            "D. ...drinks are healthy mineral water... (Sai trật tự danh tính từ)."
+          ],
+          step3: "Tại sao chọn A? Danh từ ghép 1: 'Fruit juice' (nước ép trái cây). Danh từ ghép 2: 'mineral water' (nước khoáng). Động từ to be số nhiều: 'are'. Vị ngữ: 'healthy drinks' (đồ uống lành mạnh).",
+          step4: "Loại B, C, D do ghép sai danh từ ghép và trật tự liên từ."
+        }
+      },
+      {
+        id: "ex7_3",
+        section: "Ex7: Put the words in the correct order to make sentences.",
+        question: "3. one / to / traditional / My / food / prefers / foreign / sister /.",
+        options: [
+          { letter: "A", text: "My sister prefers traditional food to foreign one." },
+          { letter: "B", text: "My sister prefers foreign food traditional to one." },
+          { letter: "C", text: "My sister food prefers traditional to foreign one." },
+          { letter: "D", text: "Traditional food prefers my sister to foreign one." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch nghĩa: 'Chị tôi thích đồ ăn truyền thống hơn đồ ăn nước ngoài.'",
+          step2: [
+            "A. My sister prefers traditional food to foreign one. (Cấu trúc prefer A to B chuẩn xác).",
+            "B. ...foreign food traditional... (Sai vị trí tính từ).",
+            "C. ...sister food prefers... (Chèn danh từ vào giữa chủ ngữ và động từ là sai).",
+            "D. Traditional food prefers... (Thức ăn thích chị tôi ➔ Sai logic)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc thích cái gì hơn cái gì: 'prefer + N1 + TO + N2'. 'Foreign one' thay thế cho 'foreign food' để tránh lặp từ.",
+          step4: "Loại B, C sai trật tự từ; loại D sai ngữ nghĩa logic."
+        }
+      },
+      {
+        id: "ex7_4",
+        section: "Ex7: Put the words in the correct order to make sentences.",
+        question: "4. a / is / regularly / way / housework / good / to / exercise / Doing / also /.",
+        options: [
+          { letter: "A", text: "Doing housework regularly is also a good way to exercise." },
+          { letter: "B", text: "Doing housework is regularly also a good way exercise." },
+          { letter: "C", text: "A good way to exercise is also regularly doing housework." },
+          { letter: "D", text: "Doing housework regularly also is a way good to exercise." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch nghĩa: 'Làm việc nhà thường xuyên cũng là một cách tốt để tập thể dục.'",
+          step2: [
+            "A. Doing housework regularly is also a good way to exercise. (Chuẩn xác 100%).",
+            "B. ...is regularly also... (Đặt trạng từ 'regularly' sai vị trí).",
+            "C. ...way to exercise... (Sắp xếp kém tự nhiên so với đề bài).",
+            "D. ...a way good... (Đặt tính từ 'good' đứng sau danh từ 'way' là sai)."
+          ],
+          step3: "Tại sao chọn A? Danh động từ làm chủ ngữ: 'Doing housework regularly'. Động từ to be + trạng từ: 'is also'. Cụm danh từ + to-V: 'a good way to exercise'.",
+          step4: "Loại B, D sai vị trí trạng từ và tính từ; loại C sắp xếp chưa tối ưu."
+        }
+      },
+      {
+        id: "ex7_5",
+        section: "Ex7: Put the words in the correct order to make sentences.",
+        question: "5. modern / our / There / science / in / a / is / school / laboratory /.",
+        options: [
+          { letter: "A", text: "There is a modern science laboratory in our school." },
+          { letter: "B", text: "There is a science laboratory modern in our school." },
+          { letter: "C", text: "In our school is a science modern laboratory there." },
+          { letter: "D", text: "There is modern a science laboratory in our school." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch nghĩa: 'Có một phòng thí nghiệm khoa học hiện đại ở trường chúng tôi.'",
+          step2: [
+            "A. There is a modern science laboratory in our school. (Chuẩn cú pháp).",
+            "B. ...laboratory modern... (Đặt tính từ 'modern' đứng sau danh từ là sai).",
+            "C. ...science modern laboratory... (Sai vị trí tính từ).",
+            "D. ...modern a science... (Đặt tính từ 'modern' đứng trước mạo từ 'a' là sai)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc chỉ sự tồn tại số ít: 'There is + a/an + Adj (modern) + N (science laboratory) + in + Place (our school)'.",
+          step4: "Loại B, C, D do vi phạm quy tắc vị trí của tính từ và mạo từ."
+        }
+      },
+
+      // ----- EXERCISE 8 -----
+      {
+        id: "ex8_1",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "1. She's good at English. She's good at history.",
+        options: [
+          { letter: "A", text: "She's good at English and history." },
+          { letter: "B", text: "She's good at English but history." },
+          { letter: "C", text: "She's good at English so history." },
+          { letter: "D", text: "She's good at English or history." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Cô ấy giỏi tiếng Anh. Cô ấy giỏi lịch sử.' ➔ 'Cô ấy giỏi tiếng Anh và lịch sử.'",
+          step2: [
+            "A. She's good at English and history. (Nối hai danh từ song song cùng tính chất bằng 'and').",
+            "B. ...but... (Dùng 'but' chỉ sự tương phản ➔ Sai nghĩa).",
+            "C. ...so... (Dùng 'so' chỉ kết quả ➔ Sai nghĩa).",
+            "D. ...or... (Dùng 'or' chỉ sự lựa chọn ➔ Sai nghĩa)."
+          ],
+          step3: "Tại sao chọn A? Hai vế câu bổ sung thông tin tích cực cùng cấp nên kết hợp danh từ bằng liên từ 'and'.",
+          step4: "Loại B, C, D do chọn sai liên từ đẳng lập."
+        }
+      },
+      {
+        id: "ex8_2",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "2. He is strong. He is confident.",
+        options: [
+          { letter: "A", text: "He is strong and confident." },
+          { letter: "B", text: "He is strong but confident." },
+          { letter: "C", text: "He is strong or confident." },
+          { letter: "D", text: "He is strong so confident." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Anh ấy khỏe mạnh. Anh ấy tự tin.' ➔ 'Anh ấy khỏe mạnh và tự tin.'",
+          step2: [
+            "A. He is strong and confident. (Đúng liên từ 'and' nối 2 tính từ).",
+            "B. ...but... (Trừ khi hai tính từ đối lập, ở đây không đối lập ➔ Sai).",
+            "C, D. Dùng 'or' / 'so' không khớp cú pháp nối tính từ."
+          ],
+          step3: "Tại sao chọn A? Nối hai tính từ cùng bổ nghĩa cho một chủ ngữ dùng 'and': $S + \\text{be} + \\text{Adj}_1 + \\text{and} + \\text{Adj}_2$.",
+          step4: "Loại B, C, D sai liên từ."
+        }
+      },
+      {
+        id: "ex8_3",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "3. The lawn is green. The lawn is fresh.",
+        options: [
+          { letter: "A", text: "The lawn is green and fresh." },
+          { letter: "B", text: "The lawn is green but fresh." },
+          { letter: "C", text: "The lawn is green so fresh." },
+          { letter: "D", text: "The lawn is green or fresh." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Bãi cỏ thì xanh. Bãi cỏ thì tươi mát.' ➔ 'Bãi cỏ xanh và tươi mát.'",
+          step2: [
+            "A. The lawn is green and fresh. (Đúng hoàn toàn).",
+            "B, C, D. Sai ý nghĩa từ nối."
+          ],
+          step3: "Tại sao chọn A? Liên từ 'and' dùng để kết hợp 2 đặc điểm tương đồng của bãi cỏ.",
+          step4: "Loại B, C, D do sai liên từ."
+        }
+      },
+      {
+        id: "ex8_4",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "4. I should go. I should see a doctor.",
+        options: [
+          { letter: "A", text: "I should go and see a doctor." },
+          { letter: "B", text: "I should go but see a doctor." },
+          { letter: "C", text: "I should go so see a doctor." },
+          { letter: "D", text: "I should go or see a doctor." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Tôi nên đi. Tôi nên đi khám bác sĩ.' ➔ 'Tôi nên đi gặp bác sĩ.'",
+          step2: [
+            "A. I should go and see a doctor. (Đúng cấu trúc nối 2 động từ sau 'should').",
+            "B, C, D. Liên từ 'but/so/or' không phù hợp ngữ cảnh hành động liên tiếp."
+          ],
+          step3: "Tại sao chọn A? Cụm động từ song song nối bằng 'and': 'should + V1 and V2'.",
+          step4: "Loại B, C, D sai liên từ."
+        }
+      },
+      {
+        id: "ex8_5",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "5. Carol is at home. Her brother is at home.",
+        options: [
+          { letter: "A", text: "Carol and her brother are at home." },
+          { letter: "B", text: "Carol but her brother is at home." },
+          { letter: "C", text: "Carol or her brother are at home." },
+          { letter: "D", text: "Carol and her brother is at home." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Carol ở nhà. Anh trai cô ấy ở nhà.' ➔ 'Carol và anh trai cô ấy đang ở nhà.'",
+          step2: [
+            "A. Carol and her brother are at home. (Đúng ngữ pháp chủ ngữ ghép số nhiều đi với 'are').",
+            "B. ...but... (Sai liên từ).",
+            "C. ...or... (Sai liên từ chỉ lựa chọn).",
+            "D. ...and... is... (Sai to be số ít 'is', 2 người phải dùng 'are')."
+          ],
+          step3: "Tại sao chọn A? Ghép hai chủ ngữ bằng 'and' tạo thành chủ ngữ số nhiều ➔ Động từ to be đổi từ 'is' sang 'are'.",
+          step4: "Loại B, C sai liên từ; loại D sai chia động từ to be."
+        }
+      },
+      {
+        id: "ex8_6",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "6. She doesn't eat potatoes. She doesn't eat onions.",
+        options: [
+          { letter: "A", text: "She doesn't eat potatoes or onions." },
+          { letter: "B", text: "She doesn't eat potatoes and onions." },
+          { letter: "C", text: "She doesn't eat potatoes but onions." },
+          { letter: "D", text: "She doesn't eat potatoes so onions." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Cô ấy không ăn khoai tây. Cô ấy không ăn hành tây.' ➔ 'Cô ấy không ăn khoai tây lẫn hành tây.'",
+          step2: [
+            "A. She doesn't eat potatoes or onions. (Trong câu phủ định, dùng 'or' để liệt kê các danh từ không làm/không ăn).",
+            "B. ...and onions (Dùng 'and' trong câu phủ định dễ gây hiểu lầm là không ăn cả hai cùng lúc).",
+            "C, D. Sai liên từ 'but/so'."
+          ],
+          step3: "Tại sao chọn A? Quy tắc phủ định: $S + \\text{doesn't V} + A + \\text{OR} + B$ (không làm A mà cũng không làm B).",
+          step4: "Loại B, C, D do sai quy tắc dùng liên từ phủ định."
+        }
+      },
+      {
+        id: "ex8_7",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "7. I like chicken soup with vegetables. I like chicken soup with mushroom.",
+        options: [
+          { letter: "A", text: "I like chicken soup with vegetables and mushroom." },
+          { letter: "B", text: "I like chicken soup with vegetables but mushroom." },
+          { letter: "C", text: "I like chicken soup with vegetables or mushroom." },
+          { letter: "D", text: "I like chicken soup with vegetables so mushroom." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Tôi thích súp gà với rau củ. Tôi thích súp gà với nấm.' ➔ 'Tôi thích súp gà với rau củ và nấm.'",
+          step2: [
+            "A. I like chicken soup with vegetables and mushroom. (Đúng).",
+            "B, C, D. Sai liên từ."
+          ],
+          step3: "Tại sao chọn A? Nối hai nguyên liệu bổ sung cùng thích bằng 'and'.",
+          step4: "Loại B, C, D sai liên từ."
+        }
+      },
+      {
+        id: "ex8_8",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "8. My mom often cooks dinner. My dad often cooks dinner.",
+        options: [
+          { letter: "A", text: "My mom and my dad often cook dinner." },
+          { letter: "B", text: "My mom and my dad often cooks dinner." },
+          { letter: "C", text: "My mom or my dad often cook dinner." },
+          { letter: "D", text: "My mom nhưng my dad often cooks dinner." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Mẹ tôi thường nấu bữa tối. Bố tôi thường nấu bữa tối.' ➔ 'Cả bố và mẹ tôi đều thường nấu bữa tối.'",
+          step2: [
+            "A. My mom and my dad often cook dinner. (Chủ ngữ ghép số nhiều ➔ Động từ 'cook' giữ nguyên thể).",
+            "B. ...often cooks... (Sai vì chủ ngữ ghép 2 người không thêm 's' vào động từ).",
+            "C, D. Sai liên từ hoặc ngữ pháp."
+          ],
+          step3: "Tại sao chọn A? Nối 2 chủ ngữ bằng 'and' tạo thành chủ ngữ số nhiều ('My mom and my dad') ➔ Động từ chia số nhiều ở Hiện tại đơn là V-bare 'cook'.",
+          step4: "Loại B chia sai động từ; loại C, D sai liên từ."
+        }
+      },
+      {
+        id: "ex8_9",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "9. The house seemed nice. The house seemed tidy.",
+        options: [
+          { letter: "A", text: "The house seemed nice and tidy." },
+          { letter: "B", text: "The house seemed nice but tidy." },
+          { letter: "C", text: "The house seemed nice so tidy." },
+          { letter: "D", text: "The house seemed nice or tidy." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Ngôi nhà có vẻ đẹp. Ngôi nhà có vẻ ngăn nắp.' ➔ 'Ngôi nhà có vẻ đẹp và ngăn nắp.'",
+          step2: [
+            "A. The house seemed nice and tidy. (Đúng cụm tính từ song song 'nice and tidy').",
+            "B, C, D. Sai liên từ."
+          ],
+          step3: "Tại sao chọn A? Hai tính từ mang nghĩa tích cực cùng miêu tả ngôi nhà nối bằng 'and'.",
+          step4: "Loại B, C, D sai liên từ."
+        }
+      },
+      {
+        id: "ex8_10",
+        section: "Ex8: Combine each pair of sentences into a new one",
+        question: "10. You should wear a mask to avoid viruses. You should wash your hand often to avoid viruses.",
+        options: [
+          { letter: "A", text: "You should wear a mask and wash your hand often to avoid viruses." },
+          { letter: "B", text: "You should wear a mask but wash your hand often to avoid viruses." },
+          { letter: "C", text: "You should wear a mask or wash your hand often to avoid viruses." },
+          { letter: "D", text: "You should wear a mask so wash your hand often to avoid viruses." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch hai câu gốc: 'Bạn nên đeo khẩu trang để tránh vi-rút. Bạn nên rửa tay thường xuyên để tránh vi-rút.' ➔ 'Bạn nên đeo khẩu trang và rửa tay thường xuyên để tránh vi-rút.'",
+          step2: [
+            "A. You should wear a mask and wash your hand often to avoid viruses. (Chuẩn xác).",
+            "B, C, D. Sai liên từ."
+          ],
+          step3: "Tại sao chọn A? Cùng là hai lời khuyên tích cực cần làm cùng lúc ➔ Nối hai động từ bằng 'and'.",
+          step4: "Loại B, C, D sai liên từ."
+        }
+      },
+
+      // ----- EXERCISE 9 -----
+      {
+        id: "ex9_1",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "1. My school has 50 classrooms.<br>➔ There _______.",
+        options: [
+          { letter: "A", text: "are 50 classrooms in my school." },
+          { letter: "B", text: "is 50 classrooms in my school." },
+          { letter: "C", text: "have 50 classrooms in my school." },
+          { letter: "D", text: "are 50 classrooms my school." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Trường tôi có 50 phòng học.' ➔ 'Có 50 phòng học ở trường tôi.'",
+          step2: [
+            "A. are 50 classrooms in my school. (Đúng ngữ pháp 'There are + N số nhiều + in...').",
+            "B. is... (Sai to be số ít 'is').",
+            "C. have... (Sai vì sau 'There' không dùng 'have').",
+            "D. ...classrooms my school. (Thiếu giới từ 'in')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc chuyển đổi sở hữu sang sự tồn tại: $S + \\text{has/have} + N \\iff \\text{There is/are} + N + \\text{in} + S$. Vì '50 classrooms' số nhiều nên dùng 'There are'.",
+          step4: "Loại B, C, D sai ngữ pháp."
+        }
+      },
+      {
+        id: "ex9_2",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "2. She loves collecting old comic books.<br>➔ She enjoys _______.",
+        options: [
+          { letter: "A", text: "collecting old comic books." },
+          { letter: "B", text: "to collect old comic books." },
+          { letter: "C", text: "collect old comic books." },
+          { letter: "D", text: "collected old comic books." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Cô ấy yêu thích việc sưu tầm truyện tranh cũ.' ➔ 'Cô ấy thích sưu tầm truyện tranh cũ.'",
+          step2: [
+            "A. collecting old comic books. (Đúng dạng V-ing sau 'enjoys').",
+            "B. to collect... (Sai vì sau 'enjoy' không dùng 'to-V').",
+            "C. collect... (Sai V-bare).",
+            "D. collected... (Sai V-ed)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc đồng nghĩa chỉ sở thích: $\\text{love/enjoy/like} + V\\text{-ing}$. 'She enjoys collecting...'.",
+          step4: "Loại B, C, D do sai dạng động từ theo sau 'enjoy'."
+        }
+      },
+      {
+        id: "ex9_3",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "3. Learning English is not difficult.<br>➔ It's _______.",
+        options: [
+          { letter: "A", text: "not difficult to learn English." },
+          { letter: "B", text: "not difficult learn English." },
+          { letter: "C", text: "difficult to learn English." },
+          { letter: "D", text: "not difficult learning English." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Học tiếng Anh thì không khó.' ➔ 'Thật không khó để học tiếng Anh.'",
+          step2: [
+            "A. not difficult to learn English. (Đúng cấu trúc It's + Adj + to-V).",
+            "B. ...difficult learn... (Thiếu 'to' trước 'learn').",
+            "C. difficult... (Mất từ phủ định 'not' làm ngược nghĩa).",
+            "D. ...learning... (Sai V-ing)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc chủ ngữ giả định: $V\\text{-ing} + \\text{be} + \\text{Adj} \\iff \\text{It is} + \\text{Adj} + \\text{to-V-bare}$.",
+          step4: "Loại B, C, D sai ngữ pháp hoặc ngược nghĩa."
+        }
+      },
+      {
+        id: "ex9_4",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "4. What food do you like most?<br>➔ What's _______?",
+        options: [
+          { letter: "A", text: "your favorite food?" },
+          { letter: "B", text: "food you like most?" },
+          { letter: "C", text: "your food favorite?" },
+          { letter: "D", text: "the most food you like?" }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Món ăn nào bạn thích nhất?' ➔ 'Món ăn yêu thích của bạn là gì?'",
+          step2: [
+            "A. your favorite food? (Đúng hoàn toàn).",
+            "B. ...food you... (Thiếu tính từ sở hữu và danh từ 'favorite').",
+            "C. ...food favorite? (Đặt tính từ 'favorite' đứng sau danh từ là sai).",
+            "D. (Sai cấu trúc)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc hỏi món yêu thích nhất tương đương: $\\text{What food do you like most?} \\iff \\text{What's your favorite food?}$.",
+          step4: "Loại B, C, D sai trật tự từ và thiếu tính từ sở hữu."
+        }
+      },
+      {
+        id: "ex9_5",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "5. I walked in the sun so long, so I got sunburn.<br>➔ I got sunburn _______.",
+        options: [
+          { letter: "A", text: "because I walked in the sun so long." },
+          { letter: "B", text: "so I walked in the sun so long." },
+          { letter: "C", text: "although I walked in the sun so long." },
+          { letter: "D", text: "but I walked in the sun so long." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Tôi đi dưới nắng quá lâu, nên tôi bị cháy nắng.' ➔ 'Tôi bị cháy nắng vì tôi đi dưới nắng quá lâu.'",
+          step2: [
+            "A. because I walked in the sun so long. (Đúng từ nối nguyên nhân 'because').",
+            "B. ...so... (Vì thế ➔ Ngược nghĩa kết quả).",
+            "C. ...although... (Mặc dù ➔ Sai tương phản).",
+            "D. ...but... (Nhưng ➔ Sai tương phản)."
+          ],
+          step3: "Tại sao chọn A? Đảo vế kết quả lên trước thì dùng liên từ nguyên nhân 'because': $\\text{Clause 1 (kết quả) + because + Clause 2 (nguyên nhân)}$.",
+          step4: "Loại B, C, D do dùng sai liên từ."
+        }
+      },
+      {
+        id: "ex9_6",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "6. James isn't a fast swimmer.<br>➔ James doesn't _______.",
+        options: [
+          { letter: "A", text: "swim fast." },
+          { letter: "B", text: "swim fastly." },
+          { letter: "C", text: "a fast swimmer." },
+          { letter: "D", text: "swimming fast." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'James không phải là một người bơi nhanh.' ➔ 'James không bơi nhanh.'",
+          step2: [
+            "A. swim fast. (Đúng ngữ pháp trạng từ 'fast').",
+            "B. ...fastly. (Sai vì 'fast' vừa là tính từ vừa là trạng từ, KHÔNG CÓ 'fastly').",
+            "C. ...a fast swimmer. (Sau trợ động từ 'doesn't' cần động từ V-bare 'swim', không dùng cụm danh từ).",
+            "D. ...swimming... (Sai V-ing)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc biến đổi từ tính từ + danh từ sang động từ + trạng từ: $S + \\text{be not a/an + Adj + N} \\iff S + \\text{doesn't + V-bare + Adv}$. Trạng từ của 'fast' vẫn giữ nguyên là 'fast'.",
+          step4: "Loại B sai từ 'fastly'; loại C thiếu động từ; loại D dùng V-ing."
+        }
+      },
+      {
+        id: "ex9_7",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "7. She usually does her homework for two hours.<br>➔ She spends _______.",
+        options: [
+          { letter: "A", text: "two hours doing her homework." },
+          { letter: "B", text: "two hours to do her homework." },
+          { letter: "C", text: "two hours do her homework." },
+          { letter: "D", text: "doing her homework two hours." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Cô ấy thường làm bài tập về nhà trong hai giờ.' ➔ 'Cô ấy dành hai giờ làm bài tập về nhà.'",
+          step2: [
+            "A. two hours doing her homework. (Đúng cấu trúc spend time V-ing).",
+            "B. ...to do... (Sai 'to-V' sau spend time).",
+            "C. ...do... (Sai V-bare).",
+            "D. ...doing... two hours. (Đảo sai vị trí thời gian)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc dành thời gian làm gì: $S + \\text{spend(s)} + \\text{time} + V\\text{-ing}$. 'She spends two hours doing her homework'.",
+          step4: "Loại B, C, D sai cấu trúc của động từ 'spend'."
+        }
+      },
+      {
+        id: "ex9_8",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "8. She's interested in watching cartoons.<br>➔ She likes _______.",
+        options: [
+          { letter: "A", text: "watching cartoons." },
+          { letter: "B", text: "watch cartoons." },
+          { letter: "C", text: "watched cartoons." },
+          { letter: "D", text: "to watching cartoons." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Cô ấy hứng thú với việc xem phim hoạt hình.' ➔ 'Cô ấy thích xem phim hoạt hình.'",
+          step2: [
+            "A. watching cartoons. (Đúng V-ing sau 'likes').",
+            "B. watch... (Sai V-bare).",
+            "C. watched... (Sai quá khứ).",
+            "D. to watching... (Sai 'to V-ing')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc sở thích tương đương: $\\text{be interested in } + V\\text{-ing} \\iff \\text{like } + V\\text{-ing}$.",
+          step4: "Loại B, C, D sai dạng động từ theo sau 'like'."
+        }
+      },
+      {
+        id: "ex9_9",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "9. It's not good to touch your face with dirty hands.<br>➔ You shouldn't _______.",
+        options: [
+          { letter: "A", text: "touch your face with dirty hands." },
+          { letter: "B", text: "to touch your face with dirty hands." },
+          { letter: "C", text: "touching your face with dirty hands." },
+          { letter: "D", text: "touched your face with dirty hands." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Chạm tay bẩn lên mặt là không tốt.' ➔ 'Bạn không nên chạm tay bẩn lên mặt.'",
+          step2: [
+            "A. touch your face with dirty hands. (Đúng shouldn't + V-bare).",
+            "B. ...to touch... (Thừa 'to').",
+            "C. ...touching... (Sai V-ing).",
+            "D. ...touched... (Sai V-ed)."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc đưa ra lời khuyên phủ định: $\\text{It's not good to V} \\iff S + \\text{shouldn't} + V\\text{-bare}$.",
+          step4: "Loại B, C, D do sai dạng động từ sau 'shouldn't'."
+        }
+      },
+      {
+        id: "ex9_10",
+        section: "Ex9: Rewrite the following sentences, using the prompts",
+        question: "10. Mr. Robert was a very good Maths teacher.<br>➔ Mr. Robert taught _______.",
+        options: [
+          { letter: "A", text: "Maths very well." },
+          { letter: "B", text: "Maths very good." },
+          { letter: "C", text: "very good Maths." },
+          { letter: "D", text: "Maths very goodly." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Thầy Robert là một giáo viên dạy Toán rất giỏi.' ➔ 'Thầy Robert đã dạy môn Toán rất giỏi/tốt.'",
+          step2: [
+            "A. Maths very well. (Đúng trạng từ 'well' bổ nghĩa cho động từ 'taught').",
+            "B. ...very good. (Sai vì 'good' là tính từ, không bổ nghĩa cho động từ 'taught').",
+            "C. ...very good Maths. (Không tự nhiên).",
+            "D. ...goodly. (Từ 'goodly' sai ngữ cảnh, trạng từ của 'good' phải là 'well')."
+          ],
+          step3: "Tại sao chọn A? Chuyển đổi tính từ + danh từ thành động từ + trạng từ: $\\text{be a good teacher} \\iff \\text{teach + Subject + WELL}$. Trạng từ bổ nghĩa cho động từ 'taught' là 'well'.",
+          step4: "Loại B, D dùng sai trạng từ; loại C sắp xếp chưa đúng."
+        }
+      },
+
+      // ----- EXERCISE 12 -----
+      {
+        id: "ex12_3",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "3. This house and your last house are different.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "This house is different from your last house." },
+          { letter: "B", text: "This house is the same as your last house." },
+          { letter: "C", text: "This house is different to your last house." },
+          { letter: "D", text: "This house is same as your last house." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Ngôi nhà này và ngôi nhà trước của bạn thì khác nhau.' ➔ 'Ngôi nhà này khác với ngôi nhà trước của bạn.'",
+          step2: [
+            "A. This house is different from your last house. (Đúng cấu trúc be different from).",
+            "B. ...the same as... (Giống hệt ➔ Ngược nghĩa).",
+            "C. ...different to... (Chưa đúng chuẩn bằng 'from').",
+            "D. ...same as... (Thiếu mạo từ 'the')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc so sánh sự khác biệt: $A + \\text{and} + B + \\text{are different} \\iff A + \\text{is different from} + B$.",
+          step4: "Loại B ngược nghĩa; loại C, D sai ngữ pháp giới từ/mạo từ."
+        }
+      },
+      {
+        id: "ex12_4",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "4. The child's height and the height of the table are the same.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "The child's height is the same as the height of the table." },
+          { letter: "B", text: "The child's height is different from the height of the table." },
+          { letter: "C", text: "The child's height is the same with the height of the table." },
+          { letter: "D", text: "The child's height is same as the height of the table." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Chiều cao của đứa trẻ và chiều cao của chiếc bàn là như nhau.' ➔ 'Chiều cao của đứa trẻ giống bằng chiều cao của chiếc bàn.'",
+          step2: [
+            "A. The child's height is the same as the height of the table. (Đúng cấu trúc be the same as).",
+            "B. ...different from... (Khác nhau ➔ Ngược nghĩa).",
+            "C. ...the same with... (Sai giới từ 'with').",
+            "D. ...same as... (Thiếu mạo từ 'the')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc so sánh giống nhau: $A + \\text{and} + B + \\text{are the same} \\iff A + \\text{is the same as} + B$.",
+          step4: "Loại B ngược nghĩa; loại C, D sai giới từ/mạo từ."
+        }
+      },
+      {
+        id: "ex12_5",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "5. Jane and her sister are very different.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "Jane is very different from her sister." },
+          { letter: "B", text: "Jane is very same as her sister." },
+          { letter: "C", text: "Jane is very different with her sister." },
+          { letter: "D", text: "Jane is the same as her sister." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Jane và chị gái cô ấy rất khác nhau.' ➔ 'Jane rất khác với chị gái cô ấy.'",
+          step2: [
+            "A. Jane is very different from her sister. (Đúng cấu trúc be different from).",
+            "B, D. ...same as... (Giống nhau ➔ Ngược nghĩa).",
+            "C. ...different with... (Sai giới từ 'with')."
+          ],
+          step3: "Tại sao chọn A? $A + \\text{and} + B + \\text{are different} \\iff A + \\text{is different from} + B$.",
+          step4: "Loại B, D sai nghĩa; loại C sai giới từ."
+        }
+      },
+      {
+        id: "ex12_6",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "6. This cake and that cake taste the same.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "This cake tastes the same as that cake." },
+          { letter: "B", text: "This cake tastes different from that cake." },
+          { letter: "C", text: "This cake tastes the same with that cake." },
+          { letter: "D", text: "This cake tastes same as that cake." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Bánh này và bánh kia có vị giống nhau.' ➔ 'Bánh này có vị giống như bánh kia.'",
+          step2: [
+            "A. This cake tastes the same as that cake. (Đúng hoàn toàn).",
+            "B. ...different from... (Khác vị ➔ Ngược nghĩa).",
+            "C. ...the same with... (Sai giới từ 'with').",
+            "D. ...same as... (Thiếu mạo từ 'the')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc với động từ giác quan: $A + \\text{taste(s) the same as} + B$. Động từ 'tastes' chia theo chủ ngữ số ít 'This cake'.",
+          step4: "Loại B ngược nghĩa; loại C, D sai mạo từ/giới từ."
+        }
+      },
+      {
+        id: "ex12_7",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "7. Food in San Francisco and food in New Orleans are different.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "Food in San Francisco is different from food in New Orleans." },
+          { letter: "B", text: "Food in San Francisco is the same as food in New Orleans." },
+          { letter: "C", text: "Food in San Francisco is different to food in New Orleans." },
+          { letter: "D", text: "Food in San Francisco is different with food in New Orleans." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Thức ăn ở San Francisco và thức ăn ở New Orleans thì khác nhau.' ➔ 'Thức ăn ở San Francisco khác với thức ăn ở New Orleans.'",
+          step2: [
+            "A. Food in San Francisco is different from food in New Orleans. (Đúng hoàn toàn).",
+            "B. ...the same as... (Giống nhau ➔ Ngược nghĩa).",
+            "C, D. ...different to/with... (Sai giới từ đi với 'different')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc so sánh khác biệt: $A + \\text{is different from} + B$. 'Food' là danh từ không đếm được đi với động từ to be số ít 'is'.",
+          step4: "Loại B ngược nghĩa; loại C, D sai giới từ."
+        }
+      },
+      {
+        id: "ex12_8",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "8. His shoes and my shoes are the same.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "His shoes are the same as my shoes." },
+          { letter: "B", text: "His shoes are different from my shoes." },
+          { letter: "C", text: "His shoes is the same as my shoes." },
+          { letter: "D", text: "His shoes are the same with my shoes." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Đôi giày của anh ấy và đôi giày của tôi thì giống nhau.' ➔ 'Đôi giày của anh ấy giống hệt đôi giày của tôi.'",
+          step2: [
+            "A. His shoes are the same as my shoes. (Đúng hoàn toàn).",
+            "B. ...different from... (Khác nhau ➔ Ngược nghĩa).",
+            "C. ...is the same... (Sai to be 'is' với danh từ số nhiều 'shoes').",
+            "D. ...the same with... (Sai giới từ 'with')."
+          ],
+          step3: "Tại sao chọn A? Danh từ số nhiều 'shoes' đi với to be 'are'. Cấu trúc so sánh giống nhau: $\\text{are the same as}$.",
+          step4: "Loại B ngược nghĩa; loại C sai to be; loại D sai giới từ."
+        }
+      },
+      {
+        id: "ex12_9",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "9. American English and British English are slightly different.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "American English is slightly different from British English." },
+          { letter: "B", text: "American English is slightly the same as British English." },
+          { letter: "C", text: "American English are slightly different from British English." },
+          { letter: "D", text: "American English is slightly different with British English." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Tiếng Anh-Mỹ và tiếng Anh-Anh hơi khác nhau một chút.' ➔ 'Tiếng Anh-Mỹ hơi khác một chút so với tiếng Anh-Anh.'",
+          step2: [
+            "A. American English is slightly different from British English. (Đúng ngữ pháp).",
+            "B. ...the same as... (Giống nhau ➔ Ngược nghĩa).",
+            "C. ...are slightly... (Sai chia to be 'are' với danh từ số ít 'American English').",
+            "D. ...different with... (Sai giới từ 'with')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc: $A + \\text{is (slightly) different from} + B$. Động từ to be 'is' chia theo chủ ngữ số ít 'American English'.",
+          step4: "Loại B ngược nghĩa; loại C sai to be; loại D sai giới từ."
+        }
+      },
+      {
+        id: "ex12_10",
+        section: "Ex 12. Rewrite each of the following sentences using \"different from\" or \"the same as\".",
+        question: "10. People say I and my mother look just the same.<br>➔ _______.",
+        options: [
+          { letter: "A", text: "People say I look just the same as my mother." },
+          { letter: "B", text: "People say I look just different from my mother." },
+          { letter: "C", text: "People say I look just the same with my mother." },
+          { letter: "D", text: "People say I look same as my mother." }
+        ],
+        correct: "A",
+        explanation: {
+          step1: "Dịch câu gốc: 'Mọi người nói tôi và mẹ tôi trông giống hệt nhau.' ➔ 'Mọi người nói tôi trông giống hệt mẹ tôi.'",
+          step2: [
+            "A. People say I look just the same as my mother. (Đúng hoàn toàn).",
+            "B. ...different from... (Trông khác ➔ Ngược nghĩa).",
+            "C. ...the same with... (Sai giới từ 'with').",
+            "D. ...same as... (Thiếu mạo từ 'the')."
+          ],
+          step3: "Tại sao chọn A? Cấu trúc so sánh trông giống nhau: $\\text{look just the same as} + N$. Mạo từ 'the' đứng trước 'same'.",
+          step4: "Loại B ngược nghĩa; loại C, D sai giới từ/mạo từ."
+        }
+      }
+    ];
+
+    /* ==========================================
+       2. TẠO ÂM THANH BẰNG WEB AUDIO API
+       ========================================== */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } else {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      }
+    }
+
+    /* ==========================================
+       3. HIỆU ỨNG PHÁO GIẤY (CONFETTI)
+       ========================================== */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      const colors = ['#8854C0', '#FDCB6E', '#00C9A7', '#FF7675', '#00D26A', '#6C5CE7'];
+
+      for (let i = 0; i < 90; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 9 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speed: Math.random() * 4 + 2,
+          rotation: Math.random() * 360
+        });
+      }
+
+      let animationFrame;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.speed;
+          p.rotation += 2;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        if (pieces.some(p => p.y < canvas.height)) {
+          animationFrame = requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animationFrame);
+        }
+      }
+      render();
+    }
+
+    /* ==========================================
+       4. LOGIC HIỂN THỊ CÂU HỎI (GIỮ NGUYÊN THỨ TỰ)
+       ========================================== */
+    let userAnswers = {};
+
+    function shuffle(array) {
+      let currentIndex = array.length, randomIndex;
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+      return array;
+    }
+
+    function renderQuiz() {
+      const quizContainer = document.getElementById('quiz-container');
+      quizContainer.innerHTML = '';
+
+      const sections = {};
+      quizData.forEach(item => {
+        if (!sections[item.section]) {
+          sections[item.section] = [];
+        }
+        sections[item.section].push(item);
+      });
+
+      for (const secTitle in sections) {
+        const secHeader = document.createElement('div');
+        secHeader.className = 'section-heading';
+        secHeader.innerHTML = `📌 ${secTitle}`;
+        quizContainer.appendChild(secHeader);
+
+        sections[secTitle].forEach(q => {
+          const card = document.createElement('div');
+          card.className = 'question-card';
+          card.id = `q-card-${q.id}`;
+
+          const shuffledOptions = shuffle([...q.options]);
+
+          let optionsHTML = '<div class="options-grid">';
+          shuffledOptions.forEach(opt => {
+            optionsHTML += `
+              <button class="option-btn" 
+                      id="btn-${q.id}-${opt.letter}" 
+                      onclick="selectAnswer('${q.id}', '${opt.letter}', '${q.correct}')">
+                <strong>${opt.letter}.</strong> ${opt.text}
+              </button>
+            `;
+          });
+          optionsHTML += '</div>';
+
+          let expStepsHTML = '';
+          if (q.explanation.step2 && Array.isArray(q.explanation.step2)) {
+            expStepsHTML = '<ul>' + q.explanation.step2.map(item => `<li>${item}</li>`).join('') + '</ul>';
+          }
+
+          const explanationHTML = `
+            <div class="explanation-box" id="exp-${q.id}">
+              <div class="exp-title">💡 PHẦN GIẢI THÍCH CHI TIẾT TỪ MS LÊ HẰNG:</div>
+              <div class="step"><strong>1. Phân tích & Dịch nghĩa câu hỏi:</strong> ${q.explanation.step1}</div>
+              ${expStepsHTML}
+              <div class="step"><strong class="highlight-green">2. Tại sao chọn đáp án đúng?</strong> ${q.explanation.step3}</div>
+              <div class="step"><strong>3. Phân tích lỗi sai các đáp án còn lại:</strong> ${q.explanation.step4}</div>
+            </div>
+          `;
+
+          card.innerHTML = `
+            <div class="question-title">${q.question}</div>
+            ${optionsHTML}
+            ${explanationHTML}
+          `;
+
+          quizContainer.appendChild(card);
+        });
+      }
+    }
+
+    function selectAnswer(qId, selectedLetter, correctLetter) {
+      if (userAnswers[qId]) return;
+
+      userAnswers[qId] = selectedLetter;
+
+      const isCorrect = (selectedLetter === correctLetter);
+      const selectedBtn = document.getElementById(`btn-${qId}-${selectedLetter}`);
+      const correctBtn = document.getElementById(`btn-${qId}-${correctLetter}`);
+      const expBox = document.getElementById(`exp-${qId}`);
+
+      const allBtns = document.querySelectorAll(`#q-card-${qId} .option-btn`);
+      allBtns.forEach(btn => btn.classList.add('disabled'));
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        playSound('correct');
+        triggerConfetti();
+      } else {
+        selectedBtn.classList.add('wrong');
+        correctBtn.classList.add('correct');
+        playSound('wrong');
+      }
+
+      if (expBox) {
+        expBox.style.display = 'block';
+      }
+
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const answeredCount = Object.keys(userAnswers).length;
+      const totalCount = quizData.length;
+      const percentage = (answeredCount / totalCount) * 100;
+      document.getElementById('progress-bar').style.width = percentage + '%';
+    }
+
+    /* ==========================================
+       5. LOGIC CHẤM ĐIỂM & TỔNG KẾT
+       ========================================== */
+    function submitQuiz() {
+      let score = 0;
+      const total = quizData.length;
+
+      quizData.forEach(q => {
+        if (userAnswers[q.id] === q.correct) {
+          score++;
+        }
+      });
+
+      const percentage = (score / total) * 100;
+      let feedback = "";
+
+      if (percentage < 50) {
+        feedback = "Điểm lần này chưa cao lắm, con cố gắng đọc kỹ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+      } else if (percentage <= 80) {
+        feedback = "Con đã có tiến bộ khá ổn rồi, con cố gắng đọc kỹ giải thích đáp án và làm lại nha. Cô tin con sẽ làm tốt hơn ở lần sau!";
+      } else {
+        feedback = "Làm tốt lắm, con cố gắng ring điểm 10 ở lần sau nha!";
+        triggerConfetti();
+      }
+
+      document.getElementById('modal-score-text').innerText = `${score} / ${total}`;
+      document.getElementById('modal-feedback-text').innerText = feedback;
+      document.getElementById('result-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('result-modal').style.display = 'none';
+    }
+
+    window.onload = function() {
+      renderQuiz();
+    };
+  </script>
+</body>
+</html>
